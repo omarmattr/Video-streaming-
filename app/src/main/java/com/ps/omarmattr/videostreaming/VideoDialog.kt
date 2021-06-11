@@ -24,6 +24,8 @@ class VideoDialog :DialogFragment() {
     private val dataSourceFactory: DataSource.Factory by lazy {
         DefaultDataSourceFactory(requireContext(), "exoplayer-sample")
     }
+    var url: String? = null
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -40,6 +42,7 @@ class VideoDialog :DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         requireArguments().getStringArrayList("url")?.let {
+            url = it[0]
             uriVideo(it[0],it[1])
         }
     }
@@ -62,7 +65,16 @@ class VideoDialog :DialogFragment() {
         mBinding.video.player = simpleExoplayer
         simpleExoplayer?.playWhenReady = true
     }
+    override fun onResume() {
+        super.onResume()
+        if (url != null)
+            uriVideo(url!!,"")
+    }
 
+    override fun onStop() {
+        super.onStop()
+        simpleExoplayer?.release()
+    }
     private fun preparePlayer(videoUrl: String) {
         simpleExoplayer?.prepare(ProgressiveMediaSource.Factory(dataSourceFactory)
             .createMediaSource(Uri.parse(videoUrl)))
@@ -72,4 +84,6 @@ class VideoDialog :DialogFragment() {
         super.onPause()
         JZVideoPlayer.releaseAllVideos()
     }
+
+
 }
